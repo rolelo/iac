@@ -29,7 +29,7 @@ export class CognitoStack extends cdk.Stack {
         email: true,
       },
       signInCaseSensitive: false,
-      mfa: cognito.Mfa.REQUIRED,
+      mfa: cognito.Mfa.OFF,
       passwordPolicy: {
         minLength: 8,
         requireDigits: true,
@@ -40,10 +40,6 @@ export class CognitoStack extends cdk.Stack {
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
       standardAttributes: {
         fullname: {
-          required: true,
-          mutable: true,
-        },
-        birthdate: {
           required: true,
           mutable: true,
         },
