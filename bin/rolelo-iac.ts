@@ -36,9 +36,8 @@ const authStack = new Pipeline(
     },
     repo: "mono-repo",
     branch: `${prefix}-auth`,
-    // branch: prefix === "prod" ? "master" : "dev",
   },
-  "buildspec.yaml",
+  "buildspec-fe.yaml",
   prefix,
   { env }
 );
@@ -61,9 +60,8 @@ const clientStack = new Pipeline(
     },
     repo: "mono-repo",
     branch: `${prefix}-client`,
-    // branch: prefix === "prod" ? "master" : "dev",
   },
-  "buildspec.yaml",
+  "buildspec-fe.yaml",
   prefix,
   { env }
 );
@@ -86,9 +84,8 @@ const organisationStack = new Pipeline(
     },
     repo: "mono-repo",
     branch: `${prefix}-organisation`,
-    // branch: prefix === "prod" ? "master" : "dev",
   },
-  "buildspec.yaml",
+  "buildspec-fe.yaml",
   prefix,
   { env }
 );
