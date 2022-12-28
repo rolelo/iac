@@ -24,11 +24,14 @@ const authStack = new Pipeline(
     bucketName: prefix + "-rolelo-auth",
     projectName: prefix + "-rolelo-auth",
     environmentVariables: {
+      WORKSPACE: {
+        value: 'auth'
+      },
       DEPLOY_BUCKET: {
         value: prefix + "-rolelo-auth",
       },
       DISTRIBUTION: {
-        value: prefix === "dev" ? "E943HERUWBJ2A" : "EE9K6I5X9TIPH",
+        value: prefix === "dev" ? "E39VMIS93QYS8D" : "EE9K6I5X9TIPH",
       },
       APP_ENVIRONMENT: {
         value: prefix,
@@ -48,11 +51,14 @@ const clientStack = new Pipeline(
     bucketName: prefix + "-rolelo-client",
     projectName: prefix + "-rolelo-client",
     environmentVariables: {
+      WORKSPACE: {
+        value: "client",
+      },
       DEPLOY_BUCKET: {
         value: prefix + "-rolelo-client",
       },
       DISTRIBUTION: {
-        value: prefix === "dev" ? "E943HERUWBJ2A" : "EE9K6I5X9TIPH",
+        value: prefix === "dev" ? "E39VMIS93QYS8D" : "EE9K6I5X9TIPH",
       },
       APP_ENVIRONMENT: {
         value: prefix,
@@ -72,6 +78,9 @@ const organisationStack = new Pipeline(
     bucketName: prefix + "-rolelo-organisation",
     projectName: prefix + "-rolelo-organisation",
     environmentVariables: {
+      WORKSPACE: {
+        value: "organisation",
+      },
       DEPLOY_BUCKET: {
         value: prefix + "-rolelo-organisation",
       },
