@@ -1,21 +1,22 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
-import { CognitoStack } from '../lib/cognito';
-import S3Stack from '../lib/s3';
-import { KubernetesStack } from '../lib/kubernetes';
-import { Pipeline } from '../lib/pipeline';
-import { Cloudfront } from '../lib/cloudfront';
+import * as cdk from "aws-cdk-lib";
+import "source-map-support/register";
+import { Cloudfront } from "../lib/cloudfront";
+import { CognitoStack } from "../lib/cognito";
+import { KubernetesStack } from "../lib/kubernetes";
+import { Pipeline } from "../lib/pipeline";
+import { ClientRegistry } from "../lib/registry";
+import S3Stack from "../lib/s3";
 
 const env = {
   region: "eu-west-1",
-  account: "619680812856",
+  account: "095812446517",
 };
 const app = new cdk.App();
 
 if (!process.env.ENV) throw Error("No environment variable has been set");
 //@ts-ignore
-const prefix: 'dev' | 'prod' = process.env.ENV;
+const prefix: "dev" | "prod" = process.env.ENV;
 
 const authStack = new Pipeline(
   app,
@@ -25,16 +26,16 @@ const authStack = new Pipeline(
     projectName: prefix + "-rolelo-auth",
     environmentVariables: {
       WORKSPACE: {
-        value: 'auth'
+        value: "auth",
       },
       DEPLOY_BUCKET: {
         value: prefix + "-rolelo-auth",
       },
       DISTRIBUTION: {
-        value: prefix === "dev" ? "E39VMIS93QYS8D" : "EE9K6I5X9TIPH",
+        value: prefix === "dev" ? "E21KVTQ4LDWAGG" : "ESN4S2P31NZQV",
       },
       APP_ENVIRONMENT: {
-        value: prefix,
+        value: prefix === "dev" ? "development" : "production",
       },
     },
     repo: "mono-repo",
@@ -58,10 +59,10 @@ const clientStack = new Pipeline(
         value: prefix + "-rolelo-client",
       },
       DISTRIBUTION: {
-        value: prefix === "dev" ? "E39VMIS93QYS8D" : "EE9K6I5X9TIPH",
+        value: prefix === "dev" ? "E2GSEZ55LCJHY3" : "E2Z5YTR4SV45RU",
       },
       APP_ENVIRONMENT: {
-        value: prefix,
+        value: prefix === "dev" ? "development" : "production",
       },
     },
     repo: "mono-repo",
@@ -85,10 +86,10 @@ const organisationStack = new Pipeline(
         value: prefix + "-rolelo-organisation",
       },
       DISTRIBUTION: {
-        value: prefix === "dev" ? "E39VMIS93QYS8D" : "EE9K6I5X9TIPH",
+        value: prefix === "dev" ? "E1UB7M57FRGR8O" : "E3SPFIL7XSAMKN",
       },
       APP_ENVIRONMENT: {
-        value: prefix,
+        value: prefix === "dev" ? "development" : "production",
       },
     },
     repo: "mono-repo",
@@ -98,22 +99,54 @@ const organisationStack = new Pipeline(
   prefix,
   { env }
 );
+const backendPipeline = new Pipeline(
+  app,
+  prefix + "-RoleloBackendPipeline",
+  {
+    bucketName: prefix + "-rolelo-backend",
+    projectName: prefix + "-rolelo-backend",
+    environmentVariables: {
+      DEPLOY_BUCKET: {
+        value: prefix + "-rolelo-backend",
+      },
+    },
+    repo: "mono-repo",
+    branch: `${prefix}-backend`,
+  },
+  "buildspec-be.yaml",
+  prefix,
+  { env }
+);
+new Cloudfront(
+  app,
+  prefix + "-RoleloCloudfront-auth",
+  authStack.s3Role!,
+  [`${prefix === "dev" ? "dev-" : ""}auth.rolelo.com`],
+  { env }
+);
 new Cloudfront(
   app,
   prefix + "-RoleloCloudfront-client",
-  authStack.s3Role!,
   clientStack.s3Role!,
+  [`${prefix === "dev" ? "dev-" : ""}client.rolelo.com`],
+  { env }
+);
+new Cloudfront(
+  app,
+  prefix + "-RoleloCloudfront-organisation",
   organisationStack.s3Role!,
-  [`${prefix === "dev" ? "dev-" : ""}app.rolelo.com`],
+  [`${prefix === "dev" ? "dev-" : ""}organisation.rolelo.com`],
   { env }
 );
 
+const clientRegistry = new ClientRegistry(app, prefix + "-registry", { env });
+
 new CognitoStack(app, "rolelo-cognito", {
-  env
+  env,
 });
-new S3Stack(app, 'rolelo-s3stack', {
-  env
+new S3Stack(app, "rolelo-s3stack", {
+  env,
 });
-new KubernetesStack(app, 'rolelo-k8sstack', {
-  env
-})
+new KubernetesStack(app, "rolelo-k8sstack", {
+  env,
+});

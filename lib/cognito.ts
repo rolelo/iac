@@ -63,13 +63,13 @@ export class CognitoStack extends cdk.Stack {
       ],
     });
 
-    const cognitoCfn = _cognito.node.defaultChild as cognito.CfnUserPool;
-    cognitoCfn.emailConfiguration = {
-      emailSendingAccount: "DEVELOPER",
-      sourceArn:
-        "arn:aws:ses:eu-west-1:619680812856:identity/info@helpmycase.co.uk",
-      from: "info@helpmycase.co.uk",
-      replyToEmailAddress: "info@helpmycase.co.uk",
-    };
+    // const cognitoCfn = _cognito.node.defaultChild as cognito.CfnUserPool;
+    // cognitoCfn.emailConfiguration = {
+    //   emailSendingAccount: "DEVELOPER",
+    //   sourceArn:
+    //     "arn:aws:ses:eu-west-1:619680812856:identity/info@helpmycase.co.uk",
+    //   from: "info@helpmycase.co.uk",
+    //   replyToEmailAddress: "info@helpmycase.co.uk",
+    // };
   }
 }
