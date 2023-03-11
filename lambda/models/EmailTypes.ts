@@ -1,9 +1,6 @@
 export enum EmailTypes {
-  ENQUIRY_SUBMISSION = "EnquirySubmission",
-  FIRM_INVITATION = "FirmInvitation",
-  REQUEST_SUBMISSION = "RequestSubmission",
-  FIRM_VERIFICATION = "FirmVerification",
-  REQUEST_CALLBACK = "RequestCallback",
+  RoleloJobApplicationStatusUpdate = "RoleloJobApplicationStatusUpdate",
+  RoleloNewApplicant = "RoleloNewApplicant",
 }
 
 export type EmailBody = {
@@ -11,5 +8,5 @@ export type EmailBody = {
 };
 
 export type EnquirySubmissionEmail = EmailBody & {
-  RequestEmail: string;
+  email: string;
 } & Record<string, unknown>;

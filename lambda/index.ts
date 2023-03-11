@@ -5,38 +5,20 @@ import { EmailTypes, EnquirySubmissionEmail } from "./models/emailTypes";
 const ses = new AWS.SES();
 
 exports.handler = async function (event: SQSEvent) {
-  let sourceEmail = "<info@helpmycase.co.uk>";
+  let sourceEmail = "<info@rolelo.com>";
   if (!event.Records.length) throw Error("Records was empty");
 
   const queueInfo = event.Records[0];
 
   try {
     switch (queueInfo.attributes.MessageGroupId) {
-      case EmailTypes.ENQUIRY_SUBMISSION:
-        sourceEmail = "Helpmycase - Enquiries " + sourceEmail;
-        await sendEnquirySubmissionEmail(
-          JSON.parse(queueInfo.body),
-          sourceEmail
-        );
+     case EmailTypes.RoleloJobApplicationStatusUpdate:
+        sourceEmail = "Rolelo - Job Application Status Update " + sourceEmail;
+        await jobApplicationStatusUpdate(JSON.parse(queueInfo.body), sourceEmail);
         break;
-      case EmailTypes.FIRM_INVITATION:
-        sourceEmail = "Helpmycase - Firms " + sourceEmail;
-        await sendAddedToFirmEmail(JSON.parse(queueInfo.body), sourceEmail);
-        break;
-      case EmailTypes.REQUEST_SUBMISSION:
-        sourceEmail = "Helpmycase - Requests " + sourceEmail;
-        await sendRequestSubmissionEmail(
-          JSON.parse(queueInfo.body),
-          sourceEmail
-        );
-        break;
-      case EmailTypes.FIRM_VERIFICATION:
-        sourceEmail = "Helpmycase - Firms " + sourceEmail;
-        await sendFirmVerification(JSON.parse(queueInfo.body), sourceEmail);
-        break;
-      case EmailTypes.REQUEST_CALLBACK:
-        sourceEmail = "Helpmycase - Request Callback " + sourceEmail;
-        await requestCallbackEmail(JSON.parse(queueInfo.body), sourceEmail);
+      case EmailTypes.RoleloNewApplicant:
+        sourceEmail = "Rolelo - New Applicant" + sourceEmail
+        await newApplicant(JSON.parse(queueInfo.body), sourceEmail)
         break;
       default:
         throw Error("Invalid Message Group ID");
@@ -48,39 +30,7 @@ exports.handler = async function (event: SQSEvent) {
   }
 };
 
-async function sendEnquirySubmissionEmail(
-  body: EnquirySubmissionEmail,
-  sourceEmail: string
-) {
-  await ses
-    .sendTemplatedEmail({
-      Destination: {
-        ToAddresses: [body.EmailAddress],
-      },
-      Source: sourceEmail,
-      Template: "HelpMyCase-EnquirySubmitted",
-      TemplateData: JSON.stringify({
-        email: body.RequestEmail,
-        url: body.Url,
-      }),
-    })
-    .promise();
-  await ses
-    .sendTemplatedEmail({
-      Destination: {
-        ToAddresses: [body.RequestEmail],
-      },
-      Source: sourceEmail,
-      Template: "HelpMyCase-EnquiryReceived",
-      TemplateData: JSON.stringify({
-        email: body.RequestEmail,
-        url: body.Url,
-      }),
-    })
-    .promise();
-}
-
-async function sendRequestSubmissionEmail(
+async function newApplicant(
   body: EnquirySubmissionEmail,
   sourceEmail: string
 ) {
@@ -88,21 +38,24 @@ async function sendRequestSubmissionEmail(
     await ses
       .sendTemplatedEmail({
         Destination: {
-          ToAddresses: [body.RequestEmail],
+          ToAddresses: [body.email],
         },
         Source: sourceEmail,
-        Template: "HelpMyCase-RequestSubmitted",
+        Template: EmailTypes.RoleloNewApplicant,
         TemplateData: JSON.stringify({
-          name: body.Name,
-          url: body.Url,
+          name: body.name,
+          listingTitle: body.listingTitle,
+          listingUrl: body.listingUrl,
+          cv: body.cv
         }),
       })
       .promise();
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 }
-async function requestCallbackEmail(
+
+async function jobApplicationStatusUpdate(
   body: EnquirySubmissionEmail,
   sourceEmail: string
 ) {
@@ -110,55 +63,16 @@ async function requestCallbackEmail(
     await ses
       .sendTemplatedEmail({
         Destination: {
-          ToAddresses: [body.RequestEmail],
+          ToAddresses: [body.email],
         },
         Source: sourceEmail,
-        Template: "HelpMyCase-RequestCallback",
+        Template: EmailTypes.RoleloJobApplicationStatusUpdate,
         TemplateData: JSON.stringify({
-          solicitorResponseNumber: body.SolicitorResponseNumber,
-          url: body.Url,
+          name: body.name,
         }),
       })
       .promise();
   } catch (e) {
     console.log(e);
   }
-}
-
-async function sendAddedToFirmEmail(
-  body: EnquirySubmissionEmail,
-  sourceEmail: string
-) {
-  await ses
-    .sendTemplatedEmail({
-      Destination: {
-        ToAddresses: [body.EmailAddress],
-      },
-      Source: sourceEmail,
-      Template: "HelpMyCase-AddedToFirm",
-      TemplateData: JSON.stringify({
-        firm_name: body.FirmName,
-        url: body.Url,
-      }),
-    })
-    .promise();
-}
-
-async function sendFirmVerification(
-  body: EnquirySubmissionEmail,
-  sourceEmail: string
-) {
-  await ses
-    .sendTemplatedEmail({
-      Destination: {
-        ToAddresses: [body.EmailAddress],
-      },
-      Source: sourceEmail,
-      Template: "HelpMyCase-FirmCreationVerification",
-      TemplateData: JSON.stringify({
-        firm_name: body.FirmName,
-        url: body.Url + "activate/firm/" + body.VerificationId,
-      }),
-    })
-    .promise();
 }

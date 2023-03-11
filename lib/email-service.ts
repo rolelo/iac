@@ -16,7 +16,7 @@ export class EmailService extends cdk.Stack {
     });
 
     const emailLambda = new lambda.NodejsFunction(this, "EmailService", {
-      entry: "lambda/EmailService/index.ts",
+      entry: "lambda/index.ts",
       bundling: {
         minify: true,
       },

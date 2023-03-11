@@ -3,6 +3,7 @@ import * as cdk from "aws-cdk-lib";
 import "source-map-support/register";
 import { Cloudfront } from "../lib/cloudfront";
 import { CognitoStack } from "../lib/cognito";
+import { EmailService } from "../lib/email-service";
 import { KubernetesStack } from "../lib/kubernetes";
 import { Pipeline } from "../lib/pipeline";
 import { ClientRegistry } from "../lib/registry";
@@ -150,3 +151,7 @@ new S3Stack(app, "rolelo-s3stack", {
 new KubernetesStack(app, "rolelo-k8sstack", {
   env,
 });
+new EmailService(app, prefix + "-RoleloEmailService", {
+  env,
+});
+
